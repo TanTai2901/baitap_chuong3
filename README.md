@@ -4,9 +4,13 @@
 
 Lệnh kiểm tra:
 
+```powershell
 flask --app sodiem routes
+```
 
+Kết quả:
 
+```text
 Endpoint            Methods          Rule
 ------------------- ---------------- --------------------------------------------
 api_score           DELETE, GET, PUT /api/students/<mssv>/scores/<course>
@@ -19,130 +23,248 @@ short_student       GET              /sv/<mssv>
 static              GET              /static/<path:filename>
 student_detail      GET              /students/<mssv>
 student_list        GET              /students
-Tổng cộng: 10 routes, bao gồm route
+```
 
-2. Kiểm thử bằng curl
-Địa chỉ server: 
-[http://127.0.0.1:8000](http://127.0.0.1:8000)
-2.1 Redirect 301
+Tổng cộng: 10 routes, bao gồm route `static`.
+
+
+## 2. Kiểm thử bằng curl
+
+Địa chỉ server: `[http://127.0.0.1:8000](http://127.0.0.1:8000)`
+
+### 2.1 Redirect 301
+
 Lệnh:
-curl.exe -i [http://127.0.0.1:8000/sv/23T1020001](http://127.0.0.1:8000/sv/23T1020001)
+```powershell
+curl.exe -i http://127.0.0.1:8000/sv/23T1020001
+```
+
 Kết quả quan trọng:
+```text
 HTTP/1.1 301 MOVED PERMANENTLY
 Location: /students/23T1020001
-2.2 Xuất bảng điểm CSV
+```
+
+
+### 2.2 Xuất bảng điểm CSV
+
 Lệnh:
-curl.exe -i [http://127.0.0.1:8000/students/23T1020001/export](http://127.0.0.1:8000/students/23T1020001/export)
+```powershell
+curl.exe -i http://127.0.0.1:8000/students/23T1020001/export
+```
+
 Kết quả quan trọng:
+```text
 HTTP/1.1 200 OK
 Content-Type: text/csv; charset=utf-8
 Content-Disposition: attachment; filename=diem_23T1020001.csv
+```
+
 Nội dung:
+```text
 hoc_phan,diem
 PMMNM,8.5
 CSDL,7.0
 MMT,9.0
-2.3 Lọc lớp và điểm trung bình
+```
+
+
+### 2.3 Lọc lớp và điểm trung bình
+
 Lệnh:
-curl.exe "[http://127.0.0.1:8000/api/students?lop=k47a&min_avg=7](http://127.0.0.1:8000/api/students?lop=k47a&min_avg=7)"
+```powershell
+curl.exe "http://127.0.0.1:8000/api/students?lop=k47a&min_avg=7"
+```
+
 Kết quả:
-Trả về JSON chứa các sinh viên thuộc lớp K47A
-và có điểm trung bình từ 7 trở lên.
-2.4 min_avg không hợp lệ
+```text
+Trả về JSON chứa các sinh viên thuộc lớp K47A và có điểm trung bình từ 7 trở lên.
+```
+
+
+### 2.4 min_avg không hợp lệ
+
 Lệnh:
-curl.exe -i "[http://127.0.0.1:8000/api/students?min_avg=abc](http://127.0.0.1:8000/api/students?min_avg=abc)"
+```powershell
+curl.exe -i "http://127.0.0.1:8000/api/students?min_avg=abc"
+```
+
 Kết quả:
+```text
 HTTP/1.1 400 BAD REQUEST
 Content-Type: application/json
+```
+
 Body:
+```json
 {
     "detail": "min_avg phải là số.",
     "error": "Dữ liệu không hợp lệ"
 }
-2.5 Sinh viên không tồn tại
+```
+
+
+### 2.5 Sinh viên không tồn tại
+
 Lệnh:
-curl.exe -i [http://127.0.0.1:8000/api/students/999](http://127.0.0.1:8000/api/students/999)
+```powershell
+curl.exe -i http://127.0.0.1:8000/api/students/999
+```
+
 Kết quả:
+```text
 HTTP/1.1 404 NOT FOUND
 Content-Type: application/json
+```
+
 Body:
+```json
 {
     "detail": "Không có sinh viên với MSSV = 999.",
     "error": "Không tìm thấy"
 }
-2.6 Thêm điểm mới
+```
+
+
+### 2.6 Thêm điểm mới
+
 Lệnh:
-curl.exe -i -X PUT "[http://127.0.0.1:8000/api/students/23T1020005/scores/web?score=9](http://127.0.0.1:8000/api/students/23T1020005/scores/web?score=9)"
+```powershell
+curl.exe -i -X PUT "http://127.0.0.1:8000/api/students/23T1020005/scores/web?score=9"
+```
+
 Kết quả:
+```text
 HTTP/1.1 201 CREATED
 Content-Type: application/json
 Location: /api/students/23T1020005/scores/WEB
+```
+
 Body:
+```json
 {
     "average": 9.0,
     "course": "WEB",
     "mssv": "23T1020005",
     "score": 9.0
 }
-2.7 Cập nhật điểm
+```
+
+
+### 2.7 Cập nhật điểm
+
 Lệnh:
-curl.exe -i -X PUT "[http://127.0.0.1:8000/api/students/23T1020005/scores/WEB?score=7.5](http://127.0.0.1:8000/api/students/23T1020005/scores/WEB?score=7.5)"
+```powershell
+curl.exe -i -X PUT "http://127.0.0.1:8000/api/students/23T1020005/scores/WEB?score=7.5"
+```
+
 Kết quả:
+```text
 HTTP/1.1 200 OK
 Content-Type: application/json
+```
+
 Body:
+```json
 {
     "average": 7.5,
     "course": "WEB",
     "mssv": "23T1020005",
     "score": 7.5
 }
-2.8 Điểm không hợp lệ
+```
+
+
+### 2.8 Điểm không hợp lệ
+
 Lệnh:
-curl.exe -i -X PUT "[http://127.0.0.1:8000/api/students/23T1020005/scores/WEB?score=11](http://127.0.0.1:8000/api/students/23T1020005/scores/WEB?score=11)"
+```powershell
+curl.exe -i -X PUT "http://127.0.0.1:8000/api/students/23T1020005/scores/WEB?score=11"
+```
+
 Kết quả:
+```text
 HTTP/1.1 400 BAD REQUEST
 Content-Type: application/json
+```
+
 Body:
+```json
 {
     "detail": "score phải nằm trong khoảng từ 0 đến 10.",
     "error": "Dữ liệu không hợp lệ"
 }
-2.9 Xóa điểm
-curl.exe -i -X DELETE "[http://127.0.0.1:8000/api/students/23T1020005/scores/WEB](http://127.0.0.1:8000/api/students/23T1020005/scores/WEB)"
-Kết quả:
-HTTP/1.1 204 NO CONTENT
-Body rỗng.
-2.10 POST vào API
+```
+
+
+### 2.9 Xóa điểm
+
 Lệnh:
-curl.exe -i -X POST "[http://127.0.0.1:8000/api/students/23T1020005/scores/WEB](http://127.0.0.1:8000/api/students/23T1020005/scores/WEB)"
+```powershell
+curl.exe -i -X DELETE "http://127.0.0.1:8000/api/students/23T1020005/scores/WEB"
+```
+
 Kết quả:
+```text
+HTTP/1.1 204 NO CONTENT
+```
+
+Body rỗng.
+
+
+### 2.10 POST vào API
+
+Lệnh:
+```powershell
+curl.exe -i -X POST "http://127.0.0.1:8000/api/students/23T1020005/scores/WEB"
+```
+
+Kết quả:
+```text
 HTTP/1.1 405 METHOD NOT ALLOWED
 Content-Type: application/json
+```
+
 API trả lỗi dưới dạng JSON.
-2.11 POST vào trang Web
+
+
+### 2.11 POST vào trang Web
+
 Lệnh:
-curl.exe -i -X POST [http://127.0.0.1:8000/students](http://127.0.0.1:8000/students)
+```powershell
+curl.exe -i -X POST http://127.0.0.1:8000/students
+```
+
 Kết quả:
+```text
 HTTP/1.1 405 METHOD NOT ALLOWED
 Content-Type: text/html; charset=utf-8
+```
+
 Trang Web trả lỗi dưới dạng HTML.
-3. Trả lời câu hỏi
-Câu 1
-Tại sao Câu 4 sử dụng 301 còn Câu 8 sử dụng 201 + Location?
 
-Câu 4 dùng 301 Moved Permanently vì /sv/<mssv> là địa chỉ rút gọn và được chuyển hướng vĩnh viễn sang địa chỉ chính /students/<mssv>.
 
-Câu 8 dùng 201 Created khi thêm một điểm học phần mới vì một tài nguyên mới vừa được tạo. Header Location cho biết URL của tài nguyên vừa tạo.
+## 3. Trả lời câu hỏi
 
-Câu 2
-Thêm điểm cho sinh viên 23T1020005 rồi khởi động lại server, điểm có còn không? Vì sao?
+### Câu 1
+
+**Tại sao Câu 4 sử dụng 301 còn Câu 8 sử dụng 201 + Location?**
+
+- Câu 4 dùng `301 Moved Permanently` vì `/sv/<mssv>` là địa chỉ rút gọn và được chuyển hướng vĩnh viễn sang địa chỉ chính `/students/<mssv>`.
+- Câu 8 dùng `201 Created` khi thêm một điểm học phần mới vì một tài nguyên mới vừa được tạo. Header `Location` cho biết URL của tài nguyên vừa tạo.
+
+
+### Câu 2
+
+**Thêm điểm cho sinh viên 23T1020005 rồi khởi động lại server, điểm có còn không? Vì sao?**
 
 Không.
 
-Điểm chỉ được thay đổi trong biến STUDENTS đang lưu trong bộ nhớ RAM. Khi server được khởi động lại, chương trình chạy lại từ đầu và biến STUDENTS được tạo lại từ dữ liệu ban đầu trong file sodiem.py.
+Điểm chỉ được thay đổi trong biến `STUDENTS` đang lưu trong bộ nhớ RAM. Khi server được khởi động lại, chương trình chạy lại từ đầu và biến `STUDENTS` được tạo lại từ dữ liệu ban đầu trong file `sodiem.py`.
 
 Ứng dụng chưa sử dụng cơ sở dữ liệu hoặc file để lưu thay đổi nên điểm mới không được lưu vĩnh viễn.
 
-4. Hoàn tất
+
+## 4. Hoàn tất
+
 Đã kiểm thử các chức năng Web, API và xử lý lỗi của ứng dụng.
